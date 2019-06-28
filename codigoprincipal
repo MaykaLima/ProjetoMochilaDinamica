@@ -1,0 +1,304 @@
+/*
+	MATD 74 - Trabalho Prático
+	Discentes: Mayka Lima, Renata Sousa
+    Descrição do programa://
+    Data: 27/06/2019
+*/
+#include <stdlib.h>
+#include <iostream>//std::cout
+#include <conio.h>
+#include <cmath>
+#include <cstdlib>
+#include <stdio.h>
+#include <string>//std::to_string
+#include <time.h>
+#include <windows.h>
+#include <fstream> 
+
+#include <iomanip>
+#include <locale>
+#include <sstream>
+#include <string> 
+using namespace std;
+
+int encontrou ;
+int aux;
+
+string RESULTADO = "";
+int CUSTOTOTAL = 0;
+
+int resultadoTotal;
+
+int vetorP[1000], vetorI[1000], matriz[1000][100];
+
+struct No {
+    int a;
+    int b;
+    int *peso;
+    int *interesse;
+    No *prox;
+};
+
+No *cabeca;
+No *no;
+
+int max(int a, int b){
+	if (a >= b) return a;
+	else return b;
+}
+
+//Imprime os requisitos selecinados dentro do valor total do orçamento do projeto
+void imprimeSelecionados(int linha, int coluna){
+	if (matriz[linha][coluna] == 0){
+		return;
+	}
+	if (matriz[linha][coluna] > matriz[linha-1][coluna] ){
+		RESULTADO += "Valor do requisito ";
+		ostringstream convertL;
+		convertL << linha;
+		RESULTADO += convertL.str(); 		
+		RESULTADO += ": ";			
+		ostringstream convertI;
+		convertI << vetorI[linha -1];
+		RESULTADO += convertI.str(); 
+		RESULTADO += "\n";
+		
+		RESULTADO += "Custo do requisito ";	
+		RESULTADO += convertL.str(); 	
+		RESULTADO += ": ";				
+		ostringstream convertR;
+		convertR << vetorP[linha -1];
+		RESULTADO += convertR.str(); 
+		
+		RESULTADO += "\n\n";
+		
+		CUSTOTOTAL += vetorP[linha-1];
+		resultadoTotal = CUSTOTOTAL;
+		imprimeSelecionados(linha - 1 , coluna - vetorP[linha-1]);	
+	}
+	else {
+		imprimeSelecionados(linha - 1 , coluna);	
+	}
+}
+
+void imprimeMatriz(int C, int N){
+	cout<<"\nImprime matriz\n";
+	for(int i = 0; i <=N; i++){
+		for(int j = 0; j <= C; j++){
+			cout<<matriz[i][j]<<"\t";
+		}
+		cout<<endl;
+	}		
+	cout<<endl;
+	cout<<endl;	
+}
+
+//Calcula os valores e custos dos requisitos dados como entrada no arquivo conforme o funcionamento similar do algoritmo da Mochila
+int Mochila(int N, int C, int vetorI[], int vetorP[]){
+	int CUSTOTOTAL = 0;
+	for(int w = 0; w <= C; w++)
+		matriz[0][w] = 0;
+	for(int i = 1; i <= N; i++)
+		matriz[i][0] = 0;
+
+	for(int i = 1; i <= N; i++){
+		for(int j = 1; j <= C; j++){	
+			if(vetorI[i - 1] <= j){
+				matriz[i][j] = max((vetorP[i - 1] + matriz[i - 1][j - vetorI[i - 1]]),matriz[i - 1][j]);
+			}
+			else{
+				matriz[i][j] = matriz[i - 1][j];				
+			}
+		}
+	}
+	
+	RESULTADO += "Orçamento do projeto: "; 
+	ostringstream convertC;
+	convertC << C;
+	RESULTADO += convertC.str(); 
+	RESULTADO += "\n";
+	
+	RESULTADO += "Quantidade de requisitos: ";	
+	ostringstream convertN;
+	convertN << N;
+	RESULTADO += convertN.str(); 
+	RESULTADO += "\n\n";
+		
+	RESULTADO += "Requisitos selecionados: \n\n";
+		
+	imprimeSelecionados(N, C);
+	
+	RESULTADO += "Custo Total: ";
+	ostringstream convertCT;
+	convertCT << resultadoTotal;
+	RESULTADO += convertCT.str(); 
+	 
+	RESULTADO += "\n";
+	
+	RESULTADO += "Valor total dos requisitos selecionados: "; 
+	
+	ostringstream convertVT;
+	convertVT << matriz[N][C];
+	RESULTADO += convertVT.str(); 
+
+	return matriz[N][C];
+}
+
+void escreveArquivo(char nomeArquivo[30], string texto){
+	
+	ofstream out(nomeArquivo); 
+        if(!out){
+            cout<<"\nArquivo nao encontrado! \n";
+        }
+        else{
+            out<<texto;
+        }
+        
+    out.close();
+}
+
+void chamaMochila(){
+	int caso = 1;
+	if (cabeca != NULL) {
+        no = cabeca;
+        while (no != NULL) {	
+        	int valor =	Mochila(no->a, no->b, no->peso, no->interesse);	
+            no = no->prox;
+            caso ++;
+        }
+        cout<<RESULTADO;
+        //escreveArquivo("saida.txt", RESULTADO);
+    }		
+}
+
+void Insere(int n, int c){
+	
+	//Inserir elementos na lista dinamicamente
+	 
+	no = (No*) malloc(sizeof(No));
+    no->a = n;
+    no->b = c;    
+    no->peso = (int*) malloc (n*sizeof ( int ) );
+    no->interesse = (int*) malloc (n*sizeof ( int ) );    
+    for (int i=0; i<n; i++){
+    	no->peso[i] = vetorP[i];
+    	no->interesse[i] = vetorI[i];
+	}
+    no->prox = NULL;
+    if (cabeca == NULL) {
+        cabeca = no;
+    }
+    else {
+        No *procura_ultimo = cabeca;
+        while (procura_ultimo->prox != NULL) {
+            procura_ultimo = procura_ultimo->prox;
+        }
+        procura_ultimo->prox = no;
+    }	
+}
+
+void cabecalho(){
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+    cout<<"\n";
+    
+    cout<<"\t\t         UNIVERSIDADE FEDERAL DA BAHIA - UFBA \n";
+    cout<<"\t\t      DEPARTAMENTO DE CIÊNCIA DA COMPUTAÇÃO - DCC   \n";  
+    cout<<"\t\t   PROGRAMA DE PÓS GRADUAÇÃO EM CIÊNCIA DA COMPUTAÇÃO \n";   
+    cout<<"\t\t   DISCIPLINA: ALGORITMOS E GRAFOS - PROFESSOR: RAFAEL \n";
+    cout<<"\t\t    DISCENTES: MAYKA E RANATA - PERÍODO LETIVO: 2019.1   \n";
+    cout<<"\n\n";
+   
+}
+void buscaArquivo(char nomeArquivo[30]){
+	int n, c, p, i, tam_ent, espaco;
+    string palavra;
+    
+    cabeca = NULL;
+	no = NULL; 
+    
+    ifstream in(nomeArquivo);
+        if(!in){
+            encontrou = 0;
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+            cout<<"\t\t\t         Arquivo nao encontrado !\n\n";
+        }
+        else{
+            encontrou = 1;
+            
+            while(!in.eof()){            	      
+            	//Leitura das entradas 
+                in>>palavra;       
+            	c = atoi(palavra.substr(0, palavra.length()).c_str());
+            	//cout<<"Capacidade: "<<c<<endl;
+            	
+				in>>palavra;				
+				n = atoi(palavra.substr(0, palavra.length()).c_str());
+				//cout<<"Quantidade: "<<n<<endl;
+            
+				
+				for (int h=0; h<n; h++){							
+					in>>palavra;
+					p = atoi(palavra.substr(0, palavra.length()).c_str());
+					//cout<<"Peso: "<<p<<endl;
+            	
+						
+					in>>palavra;						
+					i = atoi(palavra.substr(0, palavra.length()).c_str());
+					//cout<<"Interesse: "<<i<<endl;
+					
+					vetorP[h] = p;
+					vetorI[h] = i;		
+				}
+				Insere(n, c);
+				
+                //Finaliza a leitura das entradas
+            }            
+        	chamaMochila();
+        }
+    in.close(); 
+}
+
+void Menu(){
+	 
+    system("cls");
+    cabecalho();
+    
+    char nomeArquivo[30];
+    
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 11);
+    cout<<"\t\t\t        Digite o nome do arquivo: \n\t\t\t\t\t";
+    gets(nomeArquivo); 
+    
+    buscaArquivo(nomeArquivo);
+     
+    while(encontrou == 0){
+        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 11);
+        cout<<"\t\t\t        Digite o nome do arquivo: \n\t\t\t\t\t";
+        gets(nomeArquivo);      
+		  
+        buscaArquivo(nomeArquivo);
+    }
+    
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 11);
+    cout<<"\n\n\t\t\t      Digite 's' ou 'S' para voltar:\n\t\t                 "; 
+    char y[2];
+    int cont = 0; 
+    
+    while(cont!=1){ 
+        y[cont] = getch();
+        if (y[cont] == 's'  ||  y[cont] == 'S'){  
+            cout << y[cont];
+            cont ++;
+        }
+    } 
+}
+
+int main(){
+	setlocale(LC_ALL, "Portuguese");
+	
+	while(true){
+        Menu();
+    }    
+    system("pause");
+	return 0;
+}
