@@ -29,7 +29,7 @@ int CUSTOTOTAL = 0;
 
 int resultadoTotal;
 
-int vetorP[1000], vetorI[1000], matriz[1000][100];
+int vetorP[1000], vetorI[1000], matriz[10000][10000];
 
 struct No {
     int a;
@@ -109,7 +109,7 @@ int Mochila(int N, int C, int vetorI[], int vetorP[]){
 			else{
 				matriz[i][j] = matriz[i - 1][j];				
 			}
-		}
+		}   
 	}
 	
 	RESULTADO += "Orçamento do projeto: "; 
@@ -166,15 +166,12 @@ void chamaMochila(){
             no = no->prox;
             caso ++;
         }
-        cout<<RESULTADO;
-        //escreveArquivo("saida.txt", RESULTADO);
+        //cout<<RESULTADO;
+        escreveArquivo("saida.txt", RESULTADO);
     }		
 }
 
 void Insere(int n, int c){
-	
-	//Inserir elementos na lista dinamicamente
-	 
 	no = (No*) malloc(sizeof(No));
     no->a = n;
     no->b = c;    
@@ -209,6 +206,9 @@ void cabecalho(){
     cout<<"\n\n";
    
 }
+
+
+
 void buscaArquivo(char nomeArquivo[30]){
 	int n, c, p, i, tam_ent, espaco;
     string palavra;
@@ -229,28 +229,22 @@ void buscaArquivo(char nomeArquivo[30]){
             	//Leitura das entradas 
                 in>>palavra;       
             	c = atoi(palavra.substr(0, palavra.length()).c_str());
-            	//cout<<"Capacidade: "<<c<<endl;
             	
 				in>>palavra;				
 				n = atoi(palavra.substr(0, palavra.length()).c_str());
-				//cout<<"Quantidade: "<<n<<endl;
             
 				
 				for (int h=0; h<n; h++){							
 					in>>palavra;
-					p = atoi(palavra.substr(0, palavra.length()).c_str());
-					//cout<<"Peso: "<<p<<endl;
-            	
+					p = atoi(palavra.substr(0, palavra.length()).c_str());            	
 						
 					in>>palavra;						
 					i = atoi(palavra.substr(0, palavra.length()).c_str());
-					//cout<<"Interesse: "<<i<<endl;
 					
 					vetorP[h] = p;
 					vetorI[h] = i;		
 				}
-				Insere(n, c);
-				
+				Insere(n, c);				
                 //Finaliza a leitura das entradas
             }            
         	chamaMochila();
@@ -261,9 +255,9 @@ void buscaArquivo(char nomeArquivo[30]){
 void Menu(){
 	 
     system("cls");
-    cabecalho();
+    cabecalho(); //Chama cabeçalho
     
-    char nomeArquivo[30];
+    char nomeArquivo[30]; //cria a variável p receber o arquivo de entrada
     
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 11);
     cout<<"\t\t\t        Digite o nome do arquivo: \n\t\t\t\t\t";
@@ -280,7 +274,8 @@ void Menu(){
     }
     
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 11);
-    cout<<"\n\n\t\t\t      Digite 's' ou 'S' para voltar:\n\t\t                 "; 
+    cout<<"\n\n\t\t\t      Arquivo de saída criado.\n\t\t                 "; 
+   
     char y[2];
     int cont = 0; 
     
@@ -294,10 +289,10 @@ void Menu(){
 }
 
 int main(){
-	setlocale(LC_ALL, "Portuguese");
+	setlocale(LC_ALL, "Portuguese"); //Aceitar acentos
 	
 	while(true){
-        Menu();
+        Menu();//Chama o menu com o cabeçalho e digita o nome do arquivo de entrada
     }    
     system("pause");
 	return 0;
